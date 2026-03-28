@@ -1,0 +1,7 @@
+{
+  "name": "navios-admin",
+  "compatibility_date": "2025-03-28",
+  "pages_build_output_dir": "dist",
+  // Cloudflare Pages Functions (Hono API)
+  // API routes are in functions/ directory
+}
