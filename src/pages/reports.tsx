@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Download } from "lucide-react";
+import { useAdmin } from "@/hooks/use-admin";
 import { useAsync } from "@/hooks/use-async";
+import { downloadCsv } from "@/lib/csv";
 import { fetchReports } from "@/lib/services/reports";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -30,6 +33,8 @@ export function ReportsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [reasonFilter, setReasonFilter] = useState("");
 
+  const { can } = useAdmin();
+
   const { data, loading } = useAsync(
     () =>
       fetchReports({
@@ -42,7 +47,17 @@ export function ReportsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">通報管理</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">通報管理</h1>
+        {can("csv.export") && data && data.data.length > 0 && (
+          <Button variant="outline" size="sm" onClick={() =>
+            downloadCsv(data.data.map((r) => ({
+              ID: r.id, 対象: r.target_type, 理由: r.reason,
+              詳細: r.detail ?? "", ステータス: r.status ?? "pending", 通報日: r.created_at,
+            })), `reports_${new Date().toISOString().slice(0, 10)}.csv`)
+          }><Download className="mr-1 size-4" />CSV出力</Button>
+        )}
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <select

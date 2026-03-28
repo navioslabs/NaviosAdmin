@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router";
-import { Search, Trophy, Trash2, MessageCircle } from "lucide-react";
+import { Search, Trophy, Trash2, MessageCircle, Download } from "lucide-react";
+import { useAdmin } from "@/hooks/use-admin";
 import { useAsync } from "@/hooks/use-async";
 import { fetchTalks, toggleHallOfFame, deleteTalk } from "@/lib/services/talks";
+import { downloadCsv } from "@/lib/csv";
 import { useToast } from "@/lib/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function TalksPage() {
   const { toast } = useToast();
+  const { can } = useAdmin();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [hofFilter, setHofFilter] = useState("");
@@ -61,7 +64,18 @@ export function TalksPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">ひとこと管理</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">ひとこと管理</h1>
+        {can("csv.export") && data && data.data.length > 0 && (
+          <Button variant="outline" size="sm" onClick={() =>
+            downloadCsv(data.data.map((t) => ({
+              ID: t.id, メッセージ: t.message, いいね: t.likes_count,
+              リプライ: t.replies_count, 殿堂入り: t.is_hall_of_fame ? "○" : "",
+              場所: t.location_text ?? "", 投稿日: t.created_at,
+            })), `talks_${new Date().toISOString().slice(0, 10)}.csv`)
+          }><Download className="mr-1 size-4" />CSV出力</Button>
+        )}
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-64">
@@ -150,9 +164,11 @@ export function TalksPage() {
                           >
                             <Trophy className={`size-3.5 ${talk.is_hall_of_fame ? "text-yellow-500" : ""}`} />
                           </Button>
-                          <Button variant="ghost" size="icon-xs" onClick={() => setDeleteId(talk.id)}>
-                            <Trash2 className="size-3.5 text-destructive" />
-                          </Button>
+                          {can("talks.delete") && (
+                            <Button variant="ghost" size="icon-xs" onClick={() => setDeleteId(talk.id)}>
+                              <Trash2 className="size-3.5 text-destructive" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

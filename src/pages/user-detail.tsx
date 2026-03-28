@@ -1,8 +1,12 @@
+import { useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router";
-import { ArrowLeft, ShieldCheck, Award } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Award, Ban } from "lucide-react";
 import { useAsync } from "@/hooks/use-async";
+import { useAdmin } from "@/hooks/use-admin";
 import { fetchUser, fetchUserBadges, fetchUserStats, toggleVerified } from "@/lib/services/users";
+import { banUser } from "@/lib/services/ban";
 import { useToast } from "@/lib/toast";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +20,9 @@ export function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { can } = useAdmin();
+  const [showBan, setShowBan] = useState(false);
+  const [banning, setBanning] = useState(false);
 
   const { data: user, loading } = useAsync(() => fetchUser(id!), [id]);
   const { data: badges } = useAsync(() => fetchUserBadges(id!), [id]);
@@ -117,14 +124,43 @@ export function UserDetailPage() {
           <Card>
             <CardHeader><CardTitle>操作</CardTitle></CardHeader>
             <CardContent className="flex flex-col gap-2">
-              <Button variant="outline" onClick={handleToggleVerified}>
-                <ShieldCheck className={`mr-2 size-4 ${user.is_verified ? "text-blue-500" : ""}`} />
-                {user.is_verified ? "認証を解除" : "認証済みに設定"}
-              </Button>
+              {can("users.edit") && (
+                <Button variant="outline" onClick={handleToggleVerified}>
+                  <ShieldCheck className={`mr-2 size-4 ${user.is_verified ? "text-blue-500" : ""}`} />
+                  {user.is_verified ? "認証を解除" : "認証済みに設定"}
+                </Button>
+              )}
+              {can("users.ban") && (
+                <Button variant="destructive" onClick={() => setShowBan(true)}>
+                  <Ban className="mr-2 size-4" />
+                  アカウントをBAN
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={showBan}
+        onOpenChange={setShowBan}
+        title="アカウントをBAN"
+        description="このユーザーのアカウントを停止します。ログインできなくなります。"
+        confirmLabel="BANする"
+        onConfirm={async () => {
+          setBanning(true);
+          try {
+            await banUser(id!);
+            toast("ユーザーをBANしました");
+            setShowBan(false);
+          } catch (e) {
+            toast(e instanceof Error ? e.message : "BAN処理に失敗しました", "error");
+          } finally {
+            setBanning(false);
+          }
+        }}
+        loading={banning}
+      />
     </div>
   );
 }

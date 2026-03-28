@@ -1,9 +1,11 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router";
-import { Search, Star, Trash2, FileText } from "lucide-react";
+import { Search, Star, Trash2, FileText, Download } from "lucide-react";
 import { useAsync } from "@/hooks/use-async";
+import { useAdmin } from "@/hooks/use-admin";
 import { fetchPosts, toggleFeatured, deletePost } from "@/lib/services/posts";
 import { useToast } from "@/lib/toast";
+import { downloadCsv } from "@/lib/csv";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ import type { CategoryId } from "@/types";
 
 export function PostsPage() {
   const { toast } = useToast();
+  const { can } = useAdmin();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
@@ -67,6 +70,28 @@ export function PostsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">投稿管理</h1>
+        {can("csv.export") && data && data.data.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              downloadCsv(
+                data.data.map((p) => ({
+                  ID: p.id,
+                  タイトル: p.title,
+                  カテゴリ: p.category,
+                  いいね: p.likes_count,
+                  コメント: p.comments_count,
+                  場所: p.location_text ?? "",
+                  投稿日: p.created_at,
+                })),
+                `posts_${new Date().toISOString().slice(0, 10)}.csv`,
+              )
+            }
+          >
+            <Download className="mr-1 size-4" />CSV出力
+          </Button>
+        )}
       </div>
 
       {/* フィルタ */}
@@ -177,13 +202,13 @@ export function PostsPage() {
                               className={`size-3.5 ${post.is_featured ? "fill-yellow-400 text-yellow-400" : ""}`}
                             />
                           </Button>
-                          <Button
+                          {can("posts.delete") && <Button
                             variant="ghost"
                             size="icon-xs"
                             onClick={() => setDeleteId(post.id)}
                           >
                             <Trash2 className="size-3.5 text-destructive" />
-                          </Button>
+                          </Button>}
                         </div>
                       </TableCell>
                     </TableRow>

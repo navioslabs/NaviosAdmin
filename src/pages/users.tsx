@@ -1,8 +1,10 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router";
-import { Search, ShieldCheck, Users as UsersIcon } from "lucide-react";
+import { Download, Search, ShieldCheck, Users as UsersIcon } from "lucide-react";
+import { useAdmin } from "@/hooks/use-admin";
 import { useAsync } from "@/hooks/use-async";
 import { fetchUsers, toggleVerified } from "@/lib/services/users";
+import { downloadCsv } from "@/lib/csv";
 import { useToast } from "@/lib/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function UsersPage() {
   const { toast } = useToast();
+  const { can } = useAdmin();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [verifiedFilter, setVerifiedFilter] = useState("");
@@ -44,7 +47,17 @@ export function UsersPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">ユーザー管理</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">ユーザー管理</h1>
+        {can("csv.export") && data && data.data.length > 0 && (
+          <Button variant="outline" size="sm" onClick={() =>
+            downloadCsv(data.data.map((u) => ({
+              ID: u.id, 表示名: u.display_name, 認証済み: u.is_verified ? "○" : "",
+              公開: u.is_public ? "○" : "", 場所: u.location_text ?? "", 登録日: u.created_at,
+            })), `users_${new Date().toISOString().slice(0, 10)}.csv`)
+          }><Download className="mr-1 size-4" />CSV出力</Button>
+        )}
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative w-64">
@@ -119,14 +132,16 @@ export function UsersPage() {
                       {new Date(user.created_at).toLocaleDateString("ja-JP")}
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={() => handleToggleVerified(user.id, user.is_verified)}
-                        title={user.is_verified ? "認証解除" : "認証する"}
-                      >
-                        <ShieldCheck className={`size-3.5 ${user.is_verified ? "text-blue-500" : ""}`} />
-                      </Button>
+                      {can("users.edit") && (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => handleToggleVerified(user.id, user.is_verified)}
+                          title={user.is_verified ? "認証解除" : "認証する"}
+                        >
+                          <ShieldCheck className={`size-3.5 ${user.is_verified ? "text-blue-500" : ""}`} />
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
