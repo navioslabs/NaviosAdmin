@@ -32,29 +32,36 @@ function LeafletMap({ posts }: { posts: { id: string; title: string; category: s
       help: "#F0425C",
     };
 
+    const createPinIcon = (color: string) =>
+      L.divIcon({
+        className: "",
+        iconSize: [28, 36],
+        iconAnchor: [14, 36],
+        popupAnchor: [0, -36],
+        html: `<svg width="28" height="36" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.27 21.73 0 14 0z" fill="${color}" stroke="white" stroke-width="2"/>
+          <circle cx="14" cy="13" r="5" fill="white" opacity="0.9"/>
+        </svg>`,
+      });
+
     const validPosts = posts.filter((p) => p.latitude != null && p.longitude != null);
 
     if (validPosts.length > 0) {
       const bounds = L.latLngBounds(
         validPosts.map((p) => [p.latitude!, p.longitude!] as [number, number]),
       );
-      map.fitBounds(bounds, { padding: [40, 40] });
+      map.fitBounds(bounds, { padding: [50, 50] });
     }
 
     for (const post of validPosts) {
       const color = catColors[post.category] ?? "#888";
-      const marker = L.circleMarker([post.latitude!, post.longitude!], {
-        radius: Math.min(6 + post.likes_count * 0.5, 16),
-        fillColor: color,
-        color: color,
-        weight: 1.5,
-        opacity: 0.9,
-        fillOpacity: 0.6,
+      const marker = L.marker([post.latitude!, post.longitude!], {
+        icon: createPinIcon(color),
       }).addTo(map);
 
       const catLabel = CAT_CONFIG[post.category as CategoryId]?.label ?? post.category;
       marker.bindPopup(
-        `<div style="font-size:13px"><strong>${post.title}</strong><br/><span style="color:${color}">${catLabel}</span> ・ ${post.likes_count}いいね</div>`,
+        `<div style="font-size:13px;line-height:1.5"><strong>${post.title}</strong><br/><span style="color:${color}">${catLabel}</span> ・ ${post.likes_count}いいね</div>`,
       );
     }
 
@@ -67,7 +74,7 @@ function LeafletMap({ posts }: { posts: { id: string; title: string; category: s
   return (
     <div
       ref={mapRef}
-      className="h-[500px] w-full rounded-lg"
+      className="h-[700px] w-full rounded-lg"
       style={{ zIndex: 0 }}
     />
   );
@@ -106,11 +113,11 @@ export function AreaMapPage() {
         </CardHeader>
         <CardContent>
           {geoPosts.loading ? (
-            <Skeleton className="h-[500px] rounded-lg" />
+            <Skeleton className="h-[700px] rounded-lg" />
           ) : geoPosts.data ? (
             <LeafletMap posts={geoPosts.data} />
           ) : (
-            <div className="flex h-[500px] items-center justify-center text-muted-foreground">
+            <div className="flex h-[700px] items-center justify-center text-muted-foreground">
               位置情報付きの投稿がありません
             </div>
           )}
