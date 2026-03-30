@@ -60,9 +60,10 @@ export interface AreaPost {
   created_at: string;
 }
 
-/** 位置情報付き投稿を取得 */
+/** 位置情報付き投稿を��得（lat/lng or location_text） */
 export async function fetchGeoPostsAll(): Promise<AreaPost[]> {
-  const { data, error } = await supabase
+  // まず lat/lng カラムがある投稿を試す
+  const { data: withCoords, error: err1 } = await supabase
     .from("posts")
     .select("id, title, category, location_text, latitude, longitude, likes_count, created_at")
     .not("latitude", "is", null)
@@ -70,8 +71,65 @@ export async function fetchGeoPostsAll(): Promise<AreaPost[]> {
     .order("created_at", { ascending: false })
     .limit(1000);
 
-  if (error) throw error;
-  return (data ?? []) as AreaPost[];
+  if (!err1 && withCoords && withCoords.length > 0) {
+    return withCoords as AreaPost[];
+  }
+
+  // lat/lng がない場合: location_text からジオコーディング
+  const { data: withText, error: err2 } = await supabase
+    .from("posts")
+    .select("id, title, category, location_text, likes_count, created_at")
+    .not("location_text", "is", null)
+    .neq("location_text", "")
+    .order("created_at", { ascending: false })
+    .limit(200);
+
+  if (err2) throw err2;
+  if (!withText || withText.length === 0) return [];
+
+  // Nominatim でジオコーディング（並列だとレート制限があるので順次）
+  const results: AreaPost[] = [];
+  const geocodeCache: Record<string, { lat: number; lon: number } | null> = {};
+
+  for (const post of withText) {
+    const loc = post.location_text?.trim();
+    if (!loc) continue;
+
+    if (!(loc in geocodeCache)) {
+      geocodeCache[loc] = await geocode(loc);
+    }
+
+    const coords = geocodeCache[loc];
+    if (coords) {
+      results.push({
+        ...post,
+        latitude: coords.lat,
+        longitude: coords.lon,
+      } as AreaPost);
+    }
+  }
+
+  return results;
+}
+
+/** Nominatim でテキスト住所を緯度経度に変換 */
+async function geocode(
+  query: string,
+): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=jp&limit=1`,
+      {
+        headers: { "User-Agent": "NaviosAdmin/1.0" },
+      },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.length === 0) return null;
+    return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+  } catch {
+    return null;
+  }
 }
 
 /** location_textベースでエリア集計（位置情報がない場合のフォールバック） */
