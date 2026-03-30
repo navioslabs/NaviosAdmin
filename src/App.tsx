@@ -26,6 +26,7 @@ const ModerationPage = lazy(() => import("@/pages/moderation").then((m) => ({ de
 const SearchLogsPage = lazy(() => import("@/pages/search-logs").then((m) => ({ default: m.SearchLogsPage })));
 const BannersPage = lazy(() => import("@/pages/banners").then((m) => ({ default: m.BannersPage })));
 const SegmentsPage = lazy(() => import("@/pages/segments").then((m) => ({ default: m.SegmentsPage })));
+const MapsUsagePage = lazy(() => import("@/pages/maps-usage").then((m) => ({ default: m.MapsUsagePage })));
 
 function PageLoader() {
   return (
@@ -94,6 +95,7 @@ export function App() {
               <Route path="search-logs" element={<SearchLogsPage />} />
               <Route path="banners" element={<BannersPage />} />
               <Route path="segments" element={<SegmentsPage />} />
+              <Route path="maps-usage" element={<MapsUsagePage />} />
             </Route>
           </Routes>
         </Suspense>

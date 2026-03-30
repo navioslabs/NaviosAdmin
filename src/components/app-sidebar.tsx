@@ -62,6 +62,7 @@ const TOOLS_NAV = [
   { title: "一括登録", path: "/bulk-import", icon: Upload },
   { title: "監査ログ", path: "/audit-log", icon: ScrollText },
   { title: "Supabase 利用状況", path: "/usage", icon: Gauge },
+  { title: "Google Maps API", path: "/maps-usage", icon: MapPin },
   { title: "設定", path: "/settings", icon: Settings },
 ];
 
