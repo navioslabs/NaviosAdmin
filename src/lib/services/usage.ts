@@ -32,12 +32,22 @@ export async function fetchUsage(): Promise<UsageData> {
 
   const res = await fetch("/api/usage", {
     headers: {
+      "Accept": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 
+  const contentType = res.headers.get("content-type") ?? "";
+
+  // HTMLが返ってきた場合（Worker未到達）
+  if (contentType.includes("text/html")) {
+    throw new Error(
+      "APIエンドポイントに到達できません。Cloudflare Pagesの再デプロイが必要な可能性があります。"
+    );
+  }
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Unknown error" }));
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
     throw new Error(err.error ?? `HTTP ${res.status}`);
   }
 

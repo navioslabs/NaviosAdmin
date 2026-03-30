@@ -90,19 +90,22 @@ app.post("/users/:id/unban", async (c) => {
 
 // Supabase Usage 取得
 app.get("/usage", async (c) => {
-  const admin = await verifyAdmin(c);
-  if (!admin) {
-    return c.json({ error: "権限がありません" }, 403);
-  }
-
-  const token = c.env.SUPABASE_ACCESS_TOKEN;
-  const ref = c.env.SUPABASE_PROJECT_REF;
-
-  if (!token || !ref) {
-    return c.json({ error: "Supabase access token or project ref not configured" }, 500);
-  }
-
   try {
+    const admin = await verifyAdmin(c);
+    if (!admin) {
+      return c.json({ error: "権限がありません" }, 403);
+    }
+
+    const token = c.env.SUPABASE_ACCESS_TOKEN;
+    const ref = c.env.SUPABASE_PROJECT_REF;
+
+    if (!token || !ref) {
+      return c.json({
+        error: "Supabase access token or project ref not configured",
+        debug: { hasToken: !!token, hasRef: !!ref },
+      }, 500);
+    }
+
     // プロジェクト情報
     const [projectRes, usageRes] = await Promise.all([
       fetch(`https://api.supabase.com/v1/projects/${ref}`, {
@@ -113,9 +116,13 @@ app.get("/usage", async (c) => {
       }),
     ]);
 
-    if (!projectRes.ok || !usageRes.ok) {
+    if (!projectRes.ok) {
+      const errText = await projectRes.text();
+      return c.json({ error: `Project API error (${projectRes.status}): ${errText}` }, 500);
+    }
+    if (!usageRes.ok) {
       const errText = await usageRes.text();
-      return c.json({ error: `Supabase API error: ${errText}` }, usageRes.status as 500);
+      return c.json({ error: `Usage API error (${usageRes.status}): ${errText}` }, 500);
     }
 
     const project = await projectRes.json();
@@ -123,7 +130,7 @@ app.get("/usage", async (c) => {
 
     return c.json({ project, usage });
   } catch (e) {
-    return c.json({ error: String(e) }, 500);
+    return c.json({ error: `Worker exception: ${String(e)}` }, 500);
   }
 });
 
