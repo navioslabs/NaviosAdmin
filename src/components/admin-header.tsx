@@ -24,7 +24,8 @@ const LABELS: Record<string, string> = {
   analytics: "分析",
   "area-map": "エリアマップ",
   ranking: "ランキング",
-  announcements: "お知らせ��信",
+  announcements: "お知らせ配信",
+  "bulk-import": "一括登録",
 };
 
 function useBreadcrumbs() {

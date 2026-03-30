@@ -12,6 +12,7 @@ import {
   MapPin,
   Crown,
   Megaphone,
+  Upload,
 } from "lucide-react";
 import {
   Sidebar,
@@ -48,6 +49,7 @@ const INSIGHTS_NAV = [
 
 const TOOLS_NAV = [
   { title: "お知らせ配信", path: "/announcements", icon: Megaphone },
+  { title: "一括登録", path: "/bulk-import", icon: Upload },
   { title: "設定", path: "/settings", icon: Settings },
 ];
 
