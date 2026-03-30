@@ -1,5 +1,5 @@
 import { useLocation, Link } from "react-router";
-import { Bell, LogOut, User, ChevronRight } from "lucide-react";
+import { LogOut, User, ChevronRight } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
+import { NotificationPanel } from "@/components/notification-panel";
+import { useRealtime } from "@/hooks/use-realtime";
 
 const LABELS: Record<string, string> = {
   posts: "投稿管理",
@@ -19,6 +21,10 @@ const LABELS: Record<string, string> = {
   users: "ユーザー管理",
   reports: "通報管理",
   settings: "設定",
+  analytics: "分析",
+  "area-map": "エリアマップ",
+  ranking: "ランキング",
+  announcements: "お知らせ��信",
 };
 
 function useBreadcrumbs() {
@@ -33,13 +39,10 @@ function useBreadcrumbs() {
   return crumbs;
 }
 
-interface AdminHeaderProps {
-  pendingReports?: number;
-}
-
-export function AdminHeader({ pendingReports = 0 }: AdminHeaderProps) {
+export function AdminHeader() {
   const { user, signOut } = useAuth();
   const crumbs = useBreadcrumbs();
+  const { events, unreadCount, markAllRead, markRead } = useRealtime();
 
   return (
     <header className="flex h-14 items-center gap-2 border-b bg-card/50 backdrop-blur-sm px-4 sticky top-0 z-10">
@@ -65,16 +68,12 @@ export function AdminHeader({ pendingReports = 0 }: AdminHeaderProps) {
       </nav>
 
       <div className="ml-auto flex items-center gap-1">
-        <Link to="/reports" className="relative">
-          <Button variant="ghost" size="icon-sm">
-            <Bell className="size-4" />
-          </Button>
-          {pendingReports > 0 && (
-            <span className="absolute -top-0.5 right-0 flex size-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white shadow-sm">
-              {pendingReports > 9 ? "9+" : pendingReports}
-            </span>
-          )}
-        </Link>
+        <NotificationPanel
+          events={events}
+          unreadCount={unreadCount}
+          onMarkAllRead={markAllRead}
+          onMarkRead={markRead}
+        />
 
         <DropdownMenu>
           <DropdownMenuTrigger

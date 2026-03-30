@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router";
-import { Search, Star, Trash2, FileText, Download } from "lucide-react";
+import { Search, Star, Trash2, FileText, Download, CheckSquare, Square, X } from "lucide-react";
 import { useAsync } from "@/hooks/use-async";
 import { useAdmin } from "@/hooks/use-admin";
 import { fetchPosts, toggleFeatured, deletePost } from "@/lib/services/posts";
+import { bulkDeletePosts, bulkToggleFeatured } from "@/lib/services/bulk";
 import { useToast } from "@/lib/toast";
 import { downloadCsv } from "@/lib/csv";
 import { Badge } from "@/components/ui/badge";
@@ -33,10 +34,60 @@ export function PostsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // 一括操作
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<"delete" | "feature" | "unfeature" | null>(null);
+  const [bulkLoading, setBulkLoading] = useState(false);
+
   const { data, loading, refetch } = useAsync(
     () => fetchPosts({ page, search, category: category || undefined }),
     [page, search, category],
   );
+
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (!data) return;
+    if (selected.size === data.data.length) {
+      setSelected(new Set());
+    } else {
+      setSelected(new Set(data.data.map((p) => p.id)));
+    }
+  };
+
+  const clearSelection = () => setSelected(new Set());
+
+  const handleBulkAction = useCallback(async () => {
+    if (!bulkAction || selected.size === 0) return;
+    setBulkLoading(true);
+    try {
+      const ids = Array.from(selected);
+      if (bulkAction === "delete") {
+        await bulkDeletePosts(ids);
+        toast(`${ids.length}件の投稿を削除しました`);
+      } else if (bulkAction === "feature") {
+        await bulkToggleFeatured(ids, true);
+        toast(`${ids.length}件を注目投稿に設定しました`);
+      } else if (bulkAction === "unfeature") {
+        await bulkToggleFeatured(ids, false);
+        toast(`${ids.length}件の注目投稿を解除しました`);
+      }
+      clearSelection();
+      setBulkAction(null);
+      refetch();
+    } catch {
+      toast("操作に失敗しました", "error");
+    } finally {
+      setBulkLoading(false);
+    }
+  }, [bulkAction, selected, toast, refetch]);
 
   const handleToggleFeatured = useCallback(
     async (id: string, current: boolean) => {
@@ -125,6 +176,43 @@ export function PostsPage() {
         </select>
       </div>
 
+      {/* 一括操作バー */}
+      {selected.size > 0 && (
+        <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5 animate-in slide-in-from-top-2">
+          <span className="text-sm font-medium">
+            {selected.size}件を選択中
+          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setBulkAction("feature")}
+            >
+              <Star className="mr-1 size-3.5" />注目設定
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setBulkAction("unfeature")}
+            >
+              注目解除
+            </Button>
+            {can("posts.delete") && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setBulkAction("delete")}
+              >
+                <Trash2 className="mr-1 size-3.5" />一括削除
+              </Button>
+            )}
+            <button onClick={clearSelection} className="ml-1 rounded-md p-1 hover:bg-muted transition-colors">
+              <X className="size-4 text-muted-foreground" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* テーブル */}
       {loading ? (
         <div className="space-y-2">
@@ -140,6 +228,18 @@ export function PostsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-10">
+                    <button
+                      onClick={toggleSelectAll}
+                      className="flex items-center justify-center"
+                    >
+                      {selected.size === data.data.length && data.data.length > 0 ? (
+                        <CheckSquare className="size-4 text-primary" />
+                      ) : (
+                        <Square className="size-4 text-muted-foreground" />
+                      )}
+                    </button>
+                  </TableHead>
                   <TableHead>タイトル</TableHead>
                   <TableHead className="w-24">カテゴリ</TableHead>
                   <TableHead className="w-24">投稿者</TableHead>
@@ -153,8 +253,21 @@ export function PostsPage() {
                 {data.data.map((post) => {
                   const cat = CAT_CONFIG[post.category as CategoryId];
                   const profile = Array.isArray(post.profiles) ? post.profiles[0] : post.profiles as { display_name: string; avatar_url: string | null } | null;
+                  const isSelected = selected.has(post.id);
                   return (
-                    <TableRow key={post.id}>
+                    <TableRow key={post.id} className={isSelected ? "bg-primary/5" : ""}>
+                      <TableCell>
+                        <button
+                          onClick={() => toggleSelect(post.id)}
+                          className="flex items-center justify-center"
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="size-4 text-primary" />
+                          ) : (
+                            <Square className="size-4 text-muted-foreground" />
+                          )}
+                        </button>
+                      </TableCell>
                       <TableCell>
                         <Link
                           to={`/posts/${post.id}`}
@@ -235,6 +348,26 @@ export function PostsPage() {
         confirmLabel="削除する"
         onConfirm={handleDelete}
         loading={deleting}
+      />
+
+      <ConfirmDialog
+        open={!!bulkAction}
+        onOpenChange={(open) => !open && setBulkAction(null)}
+        title={
+          bulkAction === "delete"
+            ? `${selected.size}件の投��を一括削除`
+            : bulkAction === "feature"
+              ? `${selected.size}件を注目投稿に設定`
+              : `${selected.size}件の注目投稿を解除`
+        }
+        description={
+          bulkAction === "delete"
+            ? "選択した投稿をすべて削除します。この操作は取り消せません。"
+            : "選択した投稿の注目設定を変更します。"
+        }
+        confirmLabel={bulkAction === "delete" ? "一括削除" : "実行"}
+        onConfirm={handleBulkAction}
+        loading={bulkLoading}
       />
     </div>
   );

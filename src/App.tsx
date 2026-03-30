@@ -15,6 +15,10 @@ const UserDetailPage = lazy(() => import("@/pages/user-detail").then((m) => ({ d
 const ReportsPage = lazy(() => import("@/pages/reports").then((m) => ({ default: m.ReportsPage })));
 const ReportDetailPage = lazy(() => import("@/pages/report-detail").then((m) => ({ default: m.ReportDetailPage })));
 const SettingsPage = lazy(() => import("@/pages/settings").then((m) => ({ default: m.SettingsPage })));
+const AnalyticsPage = lazy(() => import("@/pages/analytics").then((m) => ({ default: m.AnalyticsPage })));
+const AreaMapPage = lazy(() => import("@/pages/area-map").then((m) => ({ default: m.AreaMapPage })));
+const RankingPage = lazy(() => import("@/pages/ranking").then((m) => ({ default: m.RankingPage })));
+const AnnouncementsPage = lazy(() => import("@/pages/announcements").then((m) => ({ default: m.AnnouncementsPage })));
 
 function PageLoader() {
   return (
@@ -72,6 +76,10 @@ export function App() {
               <Route path="reports" element={<ReportsPage />} />
               <Route path="reports/:id" element={<ReportDetailPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="analytics" element={<AnalyticsPage />} />
+              <Route path="area-map" element={<AreaMapPage />} />
+              <Route path="ranking" element={<RankingPage />} />
+              <Route path="announcements" element={<AnnouncementsPage />} />
             </Route>
           </Routes>
         </Suspense>

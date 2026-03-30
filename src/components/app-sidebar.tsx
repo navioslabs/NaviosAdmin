@@ -8,6 +8,10 @@ import {
   Settings,
   Moon,
   Sun,
+  BarChart3,
+  MapPin,
+  Crown,
+  Megaphone,
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,13 +32,23 @@ import { useAuth } from "@/lib/auth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useTheme } from "@/hooks/use-theme";
 
-const NAV_ITEMS = [
+const MAIN_NAV = [
   { title: "ダッシュボード", path: "/", icon: LayoutDashboard, badge: false },
   { title: "投稿管理", path: "/posts", icon: FileText, badge: false },
   { title: "ひとこと管理", path: "/talks", icon: MessageCircle, badge: false },
   { title: "ユーザー管理", path: "/users", icon: Users, badge: false },
   { title: "通報管理", path: "/reports", icon: AlertTriangle, badge: true },
-  { title: "設定", path: "/settings", icon: Settings, badge: false },
+];
+
+const INSIGHTS_NAV = [
+  { title: "分析", path: "/analytics", icon: BarChart3 },
+  { title: "エリアマップ", path: "/area-map", icon: MapPin },
+  { title: "ランキング", path: "/ranking", icon: Crown },
+];
+
+const TOOLS_NAV = [
+  { title: "お知らせ配信", path: "/announcements", icon: Megaphone },
+  { title: "設定", path: "/settings", icon: Settings },
 ];
 
 interface AppSidebarProps {
@@ -70,11 +84,12 @@ export function AppSidebar({ pendingReports = 0 }: AppSidebarProps) {
       <SidebarSeparator />
 
       <SidebarContent>
+        {/* メイン */}
         <SidebarGroup>
-          <SidebarGroupLabel>メニュー</SidebarGroupLabel>
+          <SidebarGroupLabel>管理</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV_ITEMS.map((item) => (
+              {MAIN_NAV.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     isActive={isActive(item.path)}
@@ -89,6 +104,48 @@ export function AppSidebar({ pendingReports = 0 }: AppSidebarProps) {
                       {pendingReports}
                     </SidebarMenuBadge>
                   )}
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* インサイト */}
+        <SidebarGroup>
+          <SidebarGroupLabel>インサイト</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {INSIGHTS_NAV.map((item) => (
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton
+                    isActive={isActive(item.path)}
+                    tooltip={item.title}
+                    render={<Link to={item.path} />}
+                  >
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ツール */}
+        <SidebarGroup>
+          <SidebarGroupLabel>ツール</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {TOOLS_NAV.map((item) => (
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton
+                    isActive={isActive(item.path)}
+                    tooltip={item.title}
+                    render={<Link to={item.path} />}
+                  >
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
