@@ -52,7 +52,7 @@ export function AdminHeader() {
   const { events, unreadCount, markAllRead, markRead } = useRealtime();
 
   return (
-    <header className="flex h-14 items-center gap-2 border-b bg-card/50 backdrop-blur-sm px-4 sticky top-0 z-10">
+    <header className="flex h-14 items-center gap-2 border-b border-border/50 glass-strong px-4 sticky top-0 z-10">
       <SidebarTrigger />
       <Separator orientation="vertical" className="mx-1 h-4" />
 

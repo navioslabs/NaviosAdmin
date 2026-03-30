@@ -31,8 +31,8 @@ function PageLoader() {
   return (
     <div className="flex h-64 items-center justify-center">
       <div className="flex flex-col items-center gap-3">
-        <div className="size-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
-        <span className="text-sm text-muted-foreground">読み込み中...</span>
+        <div className="size-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary glow-primary-sm" />
+        <span className="text-sm text-muted-foreground font-mono">LOADING...</span>
       </div>
     </div>
   );
@@ -43,10 +43,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-4">
-          <img src="/logo.svg" alt="Navios" className="size-12 rounded-xl animate-pulse" />
-          <div className="size-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+      <div className="flex h-screen items-center justify-center bg-background bg-grid">
+        <div className="flex flex-col items-center gap-5">
+          <img src="/logo.svg" alt="Navios" className="size-14 rounded-2xl glow-primary-lg animate-pulse" />
+          <div className="size-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
         </div>
       </div>
     );

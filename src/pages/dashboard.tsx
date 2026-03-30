@@ -33,12 +33,14 @@ export function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* ウェルカムバナー */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-6 ring-1 ring-primary/10">
-        <div className="absolute -top-12 -right-12 size-40 rounded-full bg-primary/10 blur-2xl" />
+      <div className="relative overflow-hidden rounded-2xl glass glow-primary-sm p-6">
+        <div className="absolute inset-0 bg-grid opacity-30" />
+        <div className="absolute -top-20 -right-20 size-52 rounded-full bg-primary/15 blur-3xl" />
+        <div className="absolute -bottom-20 -left-20 size-40 rounded-full bg-primary/10 blur-3xl" />
         <div className="relative">
-          <div className="flex items-center gap-2 text-sm text-primary font-medium mb-1">
+          <div className="flex items-center gap-2 text-sm text-primary font-semibold mb-1">
             <Activity className="size-4" />
-            <span>ダッシュボード</span>
+            <span className="text-glow">DASHBOARD</span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight">
             {greeting}、{user?.email?.split("@")[0] ?? "管理者"}さん

@@ -77,7 +77,7 @@ export function KpiCards({ data }: { data: KpiData }) {
         <Link
           key={card.title}
           to={card.link}
-          className={`group relative flex flex-col gap-3 overflow-hidden rounded-xl bg-card p-4 text-card-foreground ring-1 ring-foreground/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:${card.ringColor}`}
+          className={`group relative flex flex-col gap-3 overflow-hidden rounded-xl glass hover-glow p-4 text-card-foreground transition-all duration-300`}
         >
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted-foreground">
