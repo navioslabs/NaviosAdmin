@@ -35,16 +35,19 @@ export function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
       {/* 背景グラデーション */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/10" />
-      <div className="absolute -top-40 -right-40 size-80 rounded-full bg-primary/5 blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 size-80 rounded-full bg-accent/10 blur-3xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-background to-primary/4" />
+      <div className="absolute -top-40 -right-40 size-96 rounded-full bg-primary/8 blur-3xl animate-pulse" />
+      <div className="absolute -bottom-40 -left-40 size-96 rounded-full bg-primary/6 blur-3xl animate-pulse [animation-delay:2s]" />
+      <div className="absolute top-1/3 left-1/2 size-64 -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
 
       <div className="relative w-full max-w-sm">
         {/* ロゴ */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-            <span className="text-xl font-black text-primary-foreground tracking-tight">N</span>
-          </div>
+          <img
+            src="/logo.svg"
+            alt="Navios"
+            className="mx-auto mb-4 size-16 rounded-2xl shadow-lg shadow-primary/25"
+          />
           <h1 className="text-2xl font-bold tracking-tight">Navios Admin</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             管理画面にログイン

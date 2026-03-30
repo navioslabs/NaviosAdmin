@@ -19,7 +19,10 @@ const SettingsPage = lazy(() => import("@/pages/settings").then((m) => ({ defaul
 function PageLoader() {
   return (
     <div className="flex h-64 items-center justify-center">
-      <div className="text-muted-foreground">読み込み中...</div>
+      <div className="flex flex-col items-center gap-3">
+        <div className="size-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+        <span className="text-sm text-muted-foreground">読み込み中...</span>
+      </div>
     </div>
   );
 }
@@ -29,8 +32,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-muted-foreground">読み込み中...</div>
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <img src="/logo.svg" alt="Navios" className="size-12 rounded-xl animate-pulse" />
+          <div className="size-6 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+        </div>
       </div>
     );
   }

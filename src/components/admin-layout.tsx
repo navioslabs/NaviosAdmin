@@ -9,9 +9,11 @@ export function AdminLayout() {
       <AppSidebar />
       <SidebarInset>
         <AdminHeader />
-        <div className="flex-1 overflow-auto p-6">
-          <Outlet />
-        </div>
+        <main className="flex-1 overflow-auto p-6">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -55,9 +55,11 @@ export function AppSidebar({ pendingReports = 0 }: AppSidebarProps) {
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center gap-3 px-2 py-2">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground font-black text-sm shadow-md shadow-primary/20">
-            N
-          </div>
+          <img
+            src="/logo.svg"
+            alt="Navios"
+            className="size-9 rounded-xl shadow-md shadow-primary/20"
+          />
           <div className="group-data-[collapsible=icon]:hidden">
             <p className="text-sm font-bold tracking-tight">Navios Admin</p>
             <p className="text-[11px] text-muted-foreground">管理画面</p>

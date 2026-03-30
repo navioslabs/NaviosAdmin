@@ -1,5 +1,5 @@
-import { FileText, Users, AlertTriangle, Trophy, TrendingUp, TrendingDown } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileText, Users, AlertTriangle, Trophy, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { Link } from "react-router";
 
 interface KpiData {
   posts_today: number;
@@ -31,8 +31,10 @@ export function KpiCards({ data }: { data: KpiData }) {
       change: postChange,
       sub: `投稿 ${data.posts_today} / ひとこと ${data.talks_today}`,
       icon: FileText,
-      color: "text-blue-500",
-      bg: "bg-blue-500/10",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-500/10",
+      ringColor: "ring-emerald-500/20",
+      link: "/posts",
     },
     {
       title: "アクティブユーザー",
@@ -40,8 +42,10 @@ export function KpiCards({ data }: { data: KpiData }) {
       change: userChange,
       sub: `前月 ${data.active_users_last_month}`,
       icon: Users,
-      color: "text-violet-500",
+      color: "text-violet-600 dark:text-violet-400",
       bg: "bg-violet-500/10",
+      ringColor: "ring-violet-500/20",
+      link: "/users",
     },
     {
       title: "未対応の通報",
@@ -49,8 +53,10 @@ export function KpiCards({ data }: { data: KpiData }) {
       change: null,
       sub: data.pending_reports > 0 ? "要対応" : "すべて対応済み",
       icon: AlertTriangle,
-      color: data.pending_reports > 0 ? "text-red-500" : "text-green-500",
+      color: data.pending_reports > 0 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400",
       bg: data.pending_reports > 0 ? "bg-red-500/10" : "bg-green-500/10",
+      ringColor: data.pending_reports > 0 ? "ring-red-500/20" : "ring-green-500/20",
+      link: "/reports",
     },
     {
       title: "殿堂入りトーク",
@@ -58,35 +64,40 @@ export function KpiCards({ data }: { data: KpiData }) {
       change: null,
       sub: "累計",
       icon: Trophy,
-      color: "text-amber-500",
+      color: "text-amber-600 dark:text-amber-400",
       bg: "bg-amber-500/10",
+      ringColor: "ring-amber-500/20",
+      link: "/talks",
     },
   ];
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => (
-        <Card
+        <Link
           key={card.title}
-          className="transition-all duration-200 hover:shadow-md hover:-translate-y-0.5"
+          to={card.link}
+          className={`group relative flex flex-col gap-3 overflow-hidden rounded-xl bg-card p-4 text-card-foreground ring-1 ring-foreground/10 transition-all duration-200 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-0.5 hover:${card.ringColor}`}
         >
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-muted-foreground">
               {card.title}
-            </CardTitle>
-            <div className={`rounded-lg p-2 ${card.bg}`}>
+            </span>
+            <div className={`rounded-xl p-2.5 ${card.bg} transition-transform duration-200 group-hover:scale-110`}>
               <card.icon className={`size-4 ${card.color}`} />
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div>
             <div className="text-3xl font-bold tabular-nums tracking-tight">
               {card.value.toLocaleString()}
             </div>
-            <div className="mt-1 flex items-center gap-1 text-xs">
+            <div className="mt-1.5 flex items-center gap-1.5 text-xs">
               {card.change && (
                 <span
-                  className={`inline-flex items-center gap-0.5 font-medium ${
-                    card.change.positive ? "text-green-600" : "text-red-500"
+                  className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 font-medium ${
+                    card.change.positive
+                      ? "bg-green-500/10 text-green-600 dark:text-green-400"
+                      : "bg-red-500/10 text-red-600 dark:text-red-400"
                   }`}
                 >
                   {card.change.positive ? (
@@ -99,8 +110,11 @@ export function KpiCards({ data }: { data: KpiData }) {
               )}
               <span className="text-muted-foreground">{card.sub}</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="absolute bottom-3 right-3 opacity-0 transition-opacity duration-200 group-hover:opacity-60">
+            <ArrowRight className="size-4 text-muted-foreground" />
+          </div>
+        </Link>
       ))}
     </div>
   );
