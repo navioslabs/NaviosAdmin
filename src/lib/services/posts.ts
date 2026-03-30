@@ -90,3 +90,49 @@ export async function deleteComment(id: string) {
   const { error } = await supabase.from("comments").delete().eq("id", id);
   if (error) throw error;
 }
+
+/** 投稿を作成 */
+export interface CreatePostInput {
+  title: string;
+  content: string;
+  category: string;
+  location_text?: string;
+  author_id: string;
+}
+
+export async function createPost(input: CreatePostInput) {
+  const { data, error } = await supabase
+    .from("posts")
+    .insert({
+      title: input.title,
+      content: input.content,
+      category: input.category,
+      location_text: input.location_text || null,
+      author_id: input.author_id,
+      image_urls: [],
+      tags: [],
+      is_featured: false,
+      likes_count: 0,
+      comments_count: 0,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/** 投稿を更新 */
+export interface UpdatePostInput {
+  title?: string;
+  content?: string;
+  category?: string;
+  location_text?: string;
+}
+
+export async function updatePost(id: string, input: UpdatePostInput) {
+  const { error } = await supabase
+    .from("posts")
+    .update(input)
+    .eq("id", id);
+  if (error) throw error;
+}

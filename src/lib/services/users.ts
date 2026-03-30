@@ -98,3 +98,12 @@ export async function toggleVerified(id: string, isVerified: boolean) {
     .eq("id", id);
   if (error) throw error;
 }
+
+/** ユーザーをロック（is_locked を切り替え） */
+export async function toggleLocked(id: string, isLocked: boolean) {
+  const { error } = await supabase
+    .from("profiles")
+    .update({ is_locked: isLocked })
+    .eq("id", id);
+  if (error) throw error;
+}

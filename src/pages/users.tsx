@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
 import { Link } from "react-router";
-import { Download, Search, ShieldCheck, Users as UsersIcon } from "lucide-react";
+import { Download, Search, ShieldCheck, Users as UsersIcon, Lock, Unlock } from "lucide-react";
 import { useAdmin } from "@/hooks/use-admin";
 import { useAsync } from "@/hooks/use-async";
-import { fetchUsers, toggleVerified } from "@/lib/services/users";
+import { fetchUsers, toggleVerified, toggleLocked } from "@/lib/services/users";
 import { downloadCsv } from "@/lib/csv";
 import { useToast } from "@/lib/toast";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +45,19 @@ export function UsersPage() {
     [toast, refetch],
   );
 
+  const handleToggleLocked = useCallback(
+    async (id: string, current: boolean) => {
+      try {
+        await toggleLocked(id, !current);
+        toast(!current ? "アカウントをロックしました" : "ロックを解除しました");
+        refetch();
+      } catch {
+        toast("操作に失敗しました", "error");
+      }
+    },
+    [toast, refetch],
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -52,7 +65,8 @@ export function UsersPage() {
         {can("csv.export") && data && data.data.length > 0 && (
           <Button variant="outline" size="sm" onClick={() =>
             downloadCsv(data.data.map((u) => ({
-              ID: u.id, 表示名: u.display_name, 認証済み: u.is_verified ? "○" : "",
+              ID: u.id, "表示名": u.display_name, "認証済み": u.is_verified ? "○" : "",
+              ロック: u.is_locked ? "○" : "",
               公開: u.is_public ? "○" : "", 場所: u.location_text ?? "", 登録日: u.created_at,
             })), `users_${new Date().toISOString().slice(0, 10)}.csv`)
           }><Download className="mr-1 size-4" />CSV出力</Button>
@@ -94,14 +108,15 @@ export function UsersPage() {
                 <TableRow>
                   <TableHead>ユーザー</TableHead>
                   <TableHead className="w-24">認証</TableHead>
+                  <TableHead className="w-24">ステータス</TableHead>
                   <TableHead className="w-24">公開</TableHead>
                   <TableHead className="w-32">登録日</TableHead>
-                  <TableHead className="w-16">操作</TableHead>
+                  <TableHead className="w-24">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {data.data.map((user) => (
-                  <TableRow key={user.id}>
+                  <TableRow key={user.id} className={(user as Record<string, unknown>).is_locked ? "opacity-60" : ""}>
                     <TableCell>
                       <Link to={`/users/${user.id}`} className="flex items-center gap-3 hover:underline">
                         <Avatar className="size-8">
@@ -125,6 +140,15 @@ export function UsersPage() {
                         </Badge>
                       )}
                     </TableCell>
+                    <TableCell>
+                      {(user as Record<string, unknown>).is_locked ? (
+                        <Badge variant="destructive" className="text-[11px]">
+                          <Lock className="mr-0.5 size-3" />ロック中
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">正常</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm">
                       {user.is_public ? "公開" : "非公開"}
                     </TableCell>
@@ -132,16 +156,24 @@ export function UsersPage() {
                       {new Date(user.created_at).toLocaleDateString("ja-JP")}
                     </TableCell>
                     <TableCell>
-                      {can("users.edit") && (
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          onClick={() => handleToggleVerified(user.id, user.is_verified)}
-                          title={user.is_verified ? "認証解除" : "認証する"}
-                        >
-                          <ShieldCheck className={`size-3.5 ${user.is_verified ? "text-blue-500" : ""}`} />
-                        </Button>
-                      )}
+                      <div className="flex items-center gap-1">
+                        {can("users.edit") && (
+                          <>
+                            <Button variant="ghost" size="icon-xs"
+                              onClick={() => handleToggleVerified(user.id, user.is_verified)}
+                              title={user.is_verified ? "認証解除" : "認証する"}>
+                              <ShieldCheck className={`size-3.5 ${user.is_verified ? "text-blue-500" : ""}`} />
+                            </Button>
+                            <Button variant="ghost" size="icon-xs"
+                              onClick={() => handleToggleLocked(user.id, !!(user as Record<string, unknown>).is_locked)}
+                              title={(user as Record<string, unknown>).is_locked ? "ロック解除" : "ロック"}>
+                              {(user as Record<string, unknown>).is_locked
+                                ? <Unlock className="size-3.5 text-green-500" />
+                                : <Lock className="size-3.5 text-muted-foreground" />}
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
