@@ -1,5 +1,5 @@
 import { useAsync } from "@/hooks/use-async";
-import { fetchUsage, type UsageMetric } from "@/lib/services/usage";
+import { fetchUsage, fetchTableStats, type UsageMetric } from "@/lib/services/usage";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -145,8 +145,20 @@ function UsageBar({ metric }: { metric: UsageMetric }) {
   );
 }
 
+const TABLE_LABELS: Record<string, string> = {
+  posts: "投稿",
+  talks: "ひとこと",
+  profiles: "ユーザー",
+  comments: "コメント",
+  reports: "通報",
+  user_badges: "バッジ",
+  admin_users: "管理者",
+  likes: "いいね",
+};
+
 export function UsagePage() {
   const { data, loading, error } = useAsync(() => fetchUsage(), []);
+  const tableStats = useAsync(() => fetchTableStats(), []);
 
   const totalCost = data?.usage?.reduce((sum, m) => sum + (m.cost ?? 0), 0) ?? 0;
 
@@ -271,6 +283,49 @@ export function UsagePage() {
                     </span>
                   </div>
                 ))}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      {/* テーブル別レコード数 */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Database className="size-4 text-primary" />
+            <CardTitle>テーブル別レコード数</CardTitle>
+          </div>
+          <CardDescription>各テーブルの現在のレコード数</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {tableStats.loading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-8 rounded-lg" />
+              ))}
+            </div>
+          ) : tableStats.data && tableStats.data.length > 0 ? (
+            <div className="space-y-2.5">
+              {tableStats.data.map((t) => {
+                const maxCount = tableStats.data![0].count || 1;
+                const pct = (t.count / maxCount) * 100;
+                return (
+                  <div key={t.table} className="flex items-center gap-3">
+                    <span className="w-20 text-sm font-medium truncate">
+                      {TABLE_LABELS[t.table] ?? t.table}
+                    </span>
+                    <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-primary/60 transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-16 text-right text-sm tabular-nums text-muted-foreground">
+                      {t.count.toLocaleString()}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           ) : null}
         </CardContent>
