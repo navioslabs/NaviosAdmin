@@ -21,6 +21,11 @@ const RankingPage = lazy(() => import("@/pages/ranking").then((m) => ({ default:
 const AnnouncementsPage = lazy(() => import("@/pages/announcements").then((m) => ({ default: m.AnnouncementsPage })));
 const BulkImportPage = lazy(() => import("@/pages/bulk-import").then((m) => ({ default: m.BulkImportPage })));
 const UsagePage = lazy(() => import("@/pages/usage").then((m) => ({ default: m.UsagePage })));
+const AuditLogPage = lazy(() => import("@/pages/audit-log").then((m) => ({ default: m.AuditLogPage })));
+const ModerationPage = lazy(() => import("@/pages/moderation").then((m) => ({ default: m.ModerationPage })));
+const SearchLogsPage = lazy(() => import("@/pages/search-logs").then((m) => ({ default: m.SearchLogsPage })));
+const BannersPage = lazy(() => import("@/pages/banners").then((m) => ({ default: m.BannersPage })));
+const SegmentsPage = lazy(() => import("@/pages/segments").then((m) => ({ default: m.SegmentsPage })));
 
 function PageLoader() {
   return (
@@ -84,6 +89,11 @@ export function App() {
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="bulk-import" element={<BulkImportPage />} />
               <Route path="usage" element={<UsagePage />} />
+              <Route path="audit-log" element={<AuditLogPage />} />
+              <Route path="moderation" element={<ModerationPage />} />
+              <Route path="search-logs" element={<SearchLogsPage />} />
+              <Route path="banners" element={<BannersPage />} />
+              <Route path="segments" element={<SegmentsPage />} />
             </Route>
           </Routes>
         </Suspense>

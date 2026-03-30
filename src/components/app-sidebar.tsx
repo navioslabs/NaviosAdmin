@@ -14,6 +14,11 @@ import {
   Megaphone,
   Upload,
   Gauge,
+  ScrollText,
+  ShieldAlert,
+  Search,
+  Image,
+  UsersRound,
 } from "lucide-react";
 import {
   Sidebar,
@@ -46,11 +51,16 @@ const INSIGHTS_NAV = [
   { title: "分析", path: "/analytics", icon: BarChart3 },
   { title: "エリアマップ", path: "/area-map", icon: MapPin },
   { title: "ランキング", path: "/ranking", icon: Crown },
+  { title: "検索ログ", path: "/search-logs", icon: Search },
+  { title: "セグメント", path: "/segments", icon: UsersRound },
 ];
 
 const TOOLS_NAV = [
   { title: "お知らせ配信", path: "/announcements", icon: Megaphone },
+  { title: "バナー管理", path: "/banners", icon: Image },
+  { title: "モデレーション", path: "/moderation", icon: ShieldAlert },
   { title: "一括登録", path: "/bulk-import", icon: Upload },
+  { title: "監査ログ", path: "/audit-log", icon: ScrollText },
   { title: "Supabase 利用状況", path: "/usage", icon: Gauge },
   { title: "設定", path: "/settings", icon: Settings },
 ];

@@ -27,6 +27,11 @@ const LABELS: Record<string, string> = {
   announcements: "お知らせ配信",
   "bulk-import": "一括登録",
   usage: "Supabase 利用状況",
+  "audit-log": "監査ログ",
+  moderation: "モデレーション",
+  "search-logs": "検索ログ",
+  banners: "バナー管理",
+  segments: "セグメント",
 };
 
 function useBreadcrumbs() {
