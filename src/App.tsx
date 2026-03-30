@@ -20,6 +20,7 @@ const AreaMapPage = lazy(() => import("@/pages/area-map").then((m) => ({ default
 const RankingPage = lazy(() => import("@/pages/ranking").then((m) => ({ default: m.RankingPage })));
 const AnnouncementsPage = lazy(() => import("@/pages/announcements").then((m) => ({ default: m.AnnouncementsPage })));
 const BulkImportPage = lazy(() => import("@/pages/bulk-import").then((m) => ({ default: m.BulkImportPage })));
+const UsagePage = lazy(() => import("@/pages/usage").then((m) => ({ default: m.UsagePage })));
 
 function PageLoader() {
   return (
@@ -82,6 +83,7 @@ export function App() {
               <Route path="ranking" element={<RankingPage />} />
               <Route path="announcements" element={<AnnouncementsPage />} />
               <Route path="bulk-import" element={<BulkImportPage />} />
+              <Route path="usage" element={<UsagePage />} />
             </Route>
           </Routes>
         </Suspense>

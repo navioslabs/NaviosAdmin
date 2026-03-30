@@ -13,6 +13,7 @@ import {
   Crown,
   Megaphone,
   Upload,
+  Gauge,
 } from "lucide-react";
 import {
   Sidebar,
@@ -50,6 +51,7 @@ const INSIGHTS_NAV = [
 const TOOLS_NAV = [
   { title: "お知らせ配信", path: "/announcements", icon: Megaphone },
   { title: "一括登録", path: "/bulk-import", icon: Upload },
+  { title: "Supabase 利用状況", path: "/usage", icon: Gauge },
   { title: "設定", path: "/settings", icon: Settings },
 ];
 

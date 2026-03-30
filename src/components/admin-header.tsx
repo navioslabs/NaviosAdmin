@@ -26,6 +26,7 @@ const LABELS: Record<string, string> = {
   ranking: "ランキング",
   announcements: "お知らせ配信",
   "bulk-import": "一括登録",
+  usage: "Supabase 利用状況",
 };
 
 function useBreadcrumbs() {

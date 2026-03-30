@@ -6,6 +6,8 @@ import { createClient } from "@supabase/supabase-js";
 type Bindings = {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
+  SUPABASE_ACCESS_TOKEN: string;
+  SUPABASE_PROJECT_REF: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>().basePath("/api");
@@ -84,6 +86,45 @@ app.post("/users/:id/unban", async (c) => {
   }
 
   return c.json({ success: true, message: "BANを解除しました" });
+});
+
+// Supabase Usage 取得
+app.get("/usage", async (c) => {
+  const admin = await verifyAdmin(c);
+  if (!admin) {
+    return c.json({ error: "権限がありません" }, 403);
+  }
+
+  const token = c.env.SUPABASE_ACCESS_TOKEN;
+  const ref = c.env.SUPABASE_PROJECT_REF;
+
+  if (!token || !ref) {
+    return c.json({ error: "Supabase access token or project ref not configured" }, 500);
+  }
+
+  try {
+    // プロジェクト情報
+    const [projectRes, usageRes] = await Promise.all([
+      fetch(`https://api.supabase.com/v1/projects/${ref}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`https://api.supabase.com/v1/projects/${ref}/usage`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
+
+    if (!projectRes.ok || !usageRes.ok) {
+      const errText = await usageRes.text();
+      return c.json({ error: `Supabase API error: ${errText}` }, usageRes.status as 500);
+    }
+
+    const project = await projectRes.json();
+    const usage = await usageRes.json();
+
+    return c.json({ project, usage });
+  } catch (e) {
+    return c.json({ error: String(e) }, 500);
+  }
 });
 
 export const onRequest = handle(app);
